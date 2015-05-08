@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Shooter.Model;
+using Shooter.View;
 
 namespace Shooter.Controller
 {
@@ -35,6 +36,12 @@ namespace Shooter.Controller
         // A movement speed for the player
         private float playerMoveSpeed;
 
+        // Image used to display the static background
+        private Texture2D mainBackground;
+
+        // Parallaxing Layers
+        private ParallaxingBackground bgLayer1;
+        private ParallaxingBackground bgLayer2;
 
         public Game1()
         {
@@ -53,9 +60,13 @@ namespace Shooter.Controller
             // TODO: Add your initialization logic here
             // Initialize the player class
             player = new Player();
+            bgLayer1 = new ParallaxingBackground();
+            bgLayer2 = new ParallaxingBackground();
 
             // Set a constant player move speed
             playerMoveSpeed = 8.0f;
+
+
 
             base.Initialize();
         }
@@ -77,7 +88,11 @@ namespace Shooter.Controller
             playerAnimation.Initialize(playerTexture, Vector2.Zero, 115, 69, 8, 30, Color.White, 1f, true);
 
             player.Initialize(playerAnimation, playerPosition);
-            
+            // Load the parallaxing background
+            bgLayer1.Initialize(Content, "Images/bgLayer1", GraphicsDevice.Viewport.Width, -1);
+            bgLayer2.Initialize(Content, "Images/bgLayer2", GraphicsDevice.Viewport.Width, -2);
+
+            mainBackground = Content.Load<Texture2D>("Images/mainbackground");
         }
 
         /// <summary>
@@ -115,6 +130,10 @@ namespace Shooter.Controller
 
             //Update the player
             UpdatePlayer(gameTime);
+
+            // Update the parallaxing background
+            bgLayer1.Update();
+            bgLayer2.Update();
 
             base.Update(gameTime);
         }
@@ -166,6 +185,12 @@ namespace Shooter.Controller
 
             // Start drawing
             spriteBatch.Begin();
+
+            spriteBatch.Draw(mainBackground, Vector2.Zero, Color.White);
+
+            // Draw the moving background
+            bgLayer1.Draw(spriteBatch);
+            bgLayer2.Draw(spriteBatch);
 
             // Draw the Player
             player.Draw(spriteBatch);
