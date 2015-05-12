@@ -22,3 +22,4 @@ C:\Users\awid5247\Documents\Visual Studio 2010\Projects\Shooter\Shooter\Shooter\
 C:\Users\awid5247\Documents\Visual Studio 2010\Projects\Shooter\Shooter\Shooter\bin\x86\Debug\Content\Images\player.xnb
 C:\Users\awid5247\Documents\Visual Studio 2010\Projects\Shooter\Shooter\Shooter\bin\x86\Debug\Content\Images\shipAnimation.xnb
 C:\Users\awid5247\Documents\Visual Studio 2010\Projects\Shooter\Shooter\Shooter\bin\x86\Debug\Content\Images\gameFont.xnb
+C:\Users\awid5247\Documents\Visual Studio 2010\Projects\Shooter\Shooter\Shooter\bin\x86\Debug\Content\Images\laser2.xnb

@@ -147,6 +147,15 @@
       <Output>C:\Users\awid5247\Documents\Visual Studio 2010\Projects\Shooter\Shooter\Shooter\bin\x86\Debug\Content\Images\gameFont.xnb</Output>
       <Time>2011-04-01T09:42:38-06:00</Time>
     </Item>
+    <Item>
+      <Source>Images\laser2.png</Source>
+      <Name>Images\laser2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>C:\Users\awid5247\Documents\Visual Studio 2010\Projects\Shooter\Shooter\Shooter\bin\x86\Debug\Content\Images\laser2.xnb</Output>
+      <Time>2015-05-12T12:53:23.2222929-06:00</Time>
+    </Item>
     <BuildSuccessful>true</BuildSuccessful>
     <Settings>
       <TargetPlatform>Windows</TargetPlatform>
