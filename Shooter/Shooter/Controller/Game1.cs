@@ -60,6 +60,15 @@ namespace Shooter.Controller
         private TimeSpan fireTime;
         private TimeSpan previousFireTime;
 
+        private Texture2D bigProjectileTexture;
+        private List<BigProjectile> bigProjectiles;
+
+        private List<UpProjectile> upProjectiles;
+        private List<DownProjectile> downProjectiles;
+
+        // The rate of fire of the player laser
+        private TimeSpan largeFireTime;
+
         private Texture2D explosionTexture;
         private List<Animation> explosions;
 
@@ -81,6 +90,12 @@ namespace Shooter.Controller
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+        }
+
+        public int getScore()
+        {
+            this.score = score;
+            return score;
         }
 
         /// <summary>
@@ -113,9 +128,16 @@ namespace Shooter.Controller
             playerMoveSpeed = 8.0f;
 
             projectiles = new List<Projectile>();
+            upProjectiles = new List<UpProjectile>();
+            downProjectiles = new List<DownProjectile>();
 
             // Set the laser to fire every quarter second
             fireTime = TimeSpan.FromSeconds(.15f);
+
+            bigProjectiles = new List<BigProjectile>();
+
+            // Set the laser to fire A LOT
+            largeFireTime = TimeSpan.FromSeconds(.01f);
 
             explosions = new List<Animation>();
 
@@ -149,6 +171,8 @@ namespace Shooter.Controller
             enemyTexture = Content.Load<Texture2D>("Images/mineAnimation");
 
             projectileTexture = Content.Load<Texture2D>("Images/laser");
+
+            bigProjectileTexture = Content.Load<Texture2D>("Images/laser2");
 
             mainBackground = Content.Load<Texture2D>("Images/mainbackground");
 
@@ -218,6 +242,10 @@ namespace Shooter.Controller
 
             // Update the projectiles
             UpdateProjectiles();
+            UpdateLargeProjectiles();
+            UpdateDownProjectiles();
+            UpdateUpProjectiles();
+            
 
             // Update the explosions
             UpdateExplosions(gameTime);
@@ -262,15 +290,53 @@ namespace Shooter.Controller
             player.Position.Y = MathHelper.Clamp(player.Position.Y, 0, GraphicsDevice.Viewport.Height - player.Height);
 
             // Fire only every interval we set as the fireTime
-            if (gameTime.TotalGameTime - previousFireTime > fireTime)
-            {
-                // Reset our current time
-                previousFireTime = gameTime.TotalGameTime;
 
-                // Add the projectile, but add it to the front and center of the player
-                AddProjectile(player.Position + new Vector2(player.Width / 2, 0));
-                // Play the laser sound
-                laserSound.Play();
+            if (Keyboard.GetState().IsKeyDown(Keys.Q) ||
+            currentGamePadState.Buttons.LeftShoulder == ButtonState.Pressed)
+            {
+                if (gameTime.TotalGameTime - previousFireTime > fireTime)
+                {
+                    // Reset our current time
+                    previousFireTime = gameTime.TotalGameTime;
+
+                    // Add the projectile, but add it to the front and center of the player
+                    AddProjectile(player.Position + new Vector2(player.Width / 2, 0));
+
+                    // Play the laser sound
+                    laserSound.Play();
+                }
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.W) ||
+            currentGamePadState.Buttons.LeftStick == ButtonState.Pressed && currentGamePadState.Buttons.RightStick == ButtonState.Pressed)
+            {
+                if (gameTime.TotalGameTime - previousFireTime > largeFireTime)
+                {
+                    //Reset our current time
+                    previousFireTime = gameTime.TotalGameTime;
+
+                    AddBigProjectile(player.Position + new Vector2(player.Width / 2, 0));
+                    // Play the laser sound
+                    laserSound.Play();
+                }
+
+            }
+
+            if (Keyboard.GetState().IsKeyDown(Keys.E) ||
+            currentGamePadState.Buttons.RightShoulder == ButtonState.Pressed)
+            {
+                if (gameTime.TotalGameTime - previousFireTime > fireTime)
+                {
+                    //Reset our current time
+                    previousFireTime = gameTime.TotalGameTime;
+
+                    AddProjectile(player.Position + new Vector2(player.Width / 2, 0));
+                    AddUpProjectile(player.Position + new Vector2(player.Width / 2, 0));
+                    AddDownProjectile(player.Position + new Vector2(player.Width / 2, 0));
+                    
+                    // Play the laser sound
+                    laserSound.Play();
+                }
+
             }
 
             // reset score if player health goes to zero
@@ -315,14 +381,34 @@ namespace Shooter.Controller
             }
         }
 
+        // Adds normal projetile lazor
         private void AddProjectile(Vector2 position)
         {
-            if (currentKeyboardState.IsKeyDown(Keys.Space))
-            {
                 Projectile projectile = new Projectile();
                 projectile.Initialize(GraphicsDevice.Viewport, projectileTexture, position);
                 projectiles.Add(projectile);
-            }
+        }
+
+        // Adds the bigger, badder lazor
+        private void AddBigProjectile(Vector2 position)
+        { 
+                BigProjectile bigProjectile = new BigProjectile();
+                bigProjectile.Initialize(GraphicsDevice.Viewport, bigProjectileTexture, position);
+                bigProjectiles.Add(bigProjectile);     
+        }
+
+        private void AddUpProjectile(Vector2 position)
+        {
+            UpProjectile upProjectile = new UpProjectile();
+            upProjectile.Initialize(GraphicsDevice.Viewport, projectileTexture, position);
+            upProjectiles.Add(upProjectile);
+        }
+
+        private void AddDownProjectile(Vector2 position)
+        {
+            DownProjectile downProjectile = new DownProjectile();
+            downProjectile.Initialize(GraphicsDevice.Viewport, projectileTexture, position);
+            downProjectiles.Add(downProjectile);
         }
 
         private void UpdateProjectiles()
@@ -340,6 +426,50 @@ namespace Shooter.Controller
             }
         }
 
+        private void UpdateUpProjectiles()
+        {
+
+            // Update the up Projectiles
+            for (int i = upProjectiles.Count - 1; i >= 0; i--)
+            {
+                upProjectiles[i].Update();
+
+                if (upProjectiles[i].Active == false)
+                {
+                    upProjectiles.RemoveAt(i);
+                }
+            }
+        }
+
+        private void UpdateDownProjectiles()
+        {
+
+            // Update the up Projectiles
+            for (int i = downProjectiles.Count - 1; i >= 0; i--)
+            {
+                downProjectiles[i].Update();
+
+                if (downProjectiles[i].Active == false)
+                {
+                    downProjectiles.RemoveAt(i);
+                }
+            }
+        }
+
+        private void UpdateLargeProjectiles()
+        {
+            
+            for (int i = bigProjectiles.Count - 1; i >= 0; i--)
+            {
+                bigProjectiles[i].Update();
+
+                if (bigProjectiles[i].Active == false)
+                {
+                    bigProjectiles.RemoveAt(i);
+                }
+            }
+            
+        }
         private void AddEnemy()
         {
             // Create the animation object
@@ -363,7 +493,8 @@ namespace Shooter.Controller
 
         private void UpdateEnemies(GameTime gameTime)
         {
-            // Spawn a new enemy enemy every 1.5 seconds
+
+            // Spawn a new enemy every 1.5 seconds
             if (gameTime.TotalGameTime - previousSpawnTime > enemySpawnTime)
             {
                 previousSpawnTime = gameTime.TotalGameTime;
@@ -375,6 +506,7 @@ namespace Shooter.Controller
             // Update the Enemies
             for (int i = enemies.Count - 1; i >= 0; i--)
             {
+                
                 enemies[i].Update(gameTime);
 
                 if (enemies[i].Active == false)
@@ -455,7 +587,74 @@ namespace Shooter.Controller
                     }
                 }
             }
+
+            for (int i = 0; i < bigProjectiles.Count; i++)
+            {
+                for (int j = 0; j < enemies.Count; j++)
+                {
+                    // Create the rectangles we need to determine if we collided with each other
+                    rectangle1 = new Rectangle((int)bigProjectiles[i].Position.X -
+                    bigProjectiles[i].Width / 2, (int)bigProjectiles[i].Position.Y -
+                    bigProjectiles[i].Height / 2, bigProjectiles[i].Width, bigProjectiles[i].Height);
+
+                    rectangle2 = new Rectangle((int)enemies[j].Position.X - enemies[j].Width / 2,
+                    (int)enemies[j].Position.Y - enemies[j].Height / 2,
+                    enemies[j].Width, enemies[j].Height);
+
+                    // Determine if the two objects collided with each other
+                    if (rectangle1.Intersects(rectangle2))
+                    {
+                        enemies[j].Health -= bigProjectiles[i].Damage;
+                        bigProjectiles[i].Active = false;
+                    }
+                }
+            }
+
+            for (int i = 0; i < upProjectiles.Count; i++)
+            {
+                for (int j = 0; j < enemies.Count; j++)
+                {
+                    // Create the rectangles we need to determine if we collided with each other
+                    rectangle1 = new Rectangle((int)upProjectiles[i].Position.X -
+                    upProjectiles[i].Width / 2, (int)upProjectiles[i].Position.Y -
+                    upProjectiles[i].Height / 2, upProjectiles[i].Width, upProjectiles[i].Height);
+
+                    rectangle2 = new Rectangle((int)enemies[j].Position.X - enemies[j].Width / 2,
+                    (int)enemies[j].Position.Y - enemies[j].Height / 2,
+                    enemies[j].Width, enemies[j].Height);
+
+                    // Determine if the two objects collided with each other
+                    if (rectangle1.Intersects(rectangle2))
+                    {
+                        enemies[j].Health -= upProjectiles[i].Damage;
+                        upProjectiles[i].Active = false;
+                    }
+                }
+            }
+
+            for (int i = 0; i < downProjectiles.Count; i++)
+            {
+                for (int j = 0; j < enemies.Count; j++)
+                {
+                    // Create the rectangles we need to determine if we collided with each other
+                    rectangle1 = new Rectangle((int)downProjectiles[i].Position.X -
+                    downProjectiles[i].Width / 2, (int)downProjectiles[i].Position.Y -
+                    downProjectiles[i].Height / 2, downProjectiles[i].Width, downProjectiles[i].Height);
+
+                    rectangle2 = new Rectangle((int)enemies[j].Position.X - enemies[j].Width / 2,
+                    (int)enemies[j].Position.Y - enemies[j].Height / 2,
+                    enemies[j].Width, enemies[j].Height);
+
+                    // Determine if the two objects collided with each other
+                    if (rectangle1.Intersects(rectangle2))
+                    {
+                        enemies[j].Health -= downProjectiles[i].Damage;
+                        downProjectiles[i].Active = false;
+                    }
+                }
+            }
         }
+        
 
         /// <summary>
         /// This is called when the game should draw itself.
@@ -487,6 +686,22 @@ namespace Shooter.Controller
             for (int i = 0; i < projectiles.Count; i++)
             {
                 projectiles[i].Draw(spriteBatch);
+            }
+
+            // Draw the bigger Projectiles
+            for (int i = 0; i < bigProjectiles.Count; i++)
+            {
+                bigProjectiles[i].Draw(spriteBatch);
+            }
+
+            for (int i = 0; i < upProjectiles.Count; i++)
+            {
+                upProjectiles[i].Draw(spriteBatch);
+            }
+
+            for (int i = 0; i < downProjectiles.Count; i++)
+            {
+                downProjectiles[i].Draw(spriteBatch);
             }
             
 
